@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app1",
-    "slug": "app1",
+    "name": "Smart English Lessons",
+    "slug": "smart-english-lessons",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
