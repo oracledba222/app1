@@ -127,9 +127,15 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
 
             <View style={styles.header}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Menu</Text>
+                    <Text style={styles.backButtonText}>←</Text>
                 </TouchableOpacity>
-                <Text style={[styles.score, { color: colors.score }]}>Score: {score}</Text>
+                <View style={{ flex: 1, alignItems: 'center', marginHorizontal: 5 }}>
+                    <Header compact lessonTitle="Irregular Verbs" />
+                </View>
+                <View style={styles.scoreContainer}>
+                    <Text style={[styles.score, { color: colors.score }]}>{score}</Text>
+                    <Text style={[styles.scoreLabel, { color: colors.score }]}>/10</Text>
+                </View>
             </View>
 
             <Animated.View style={[styles.card, animatedCardStyle, { backgroundColor: colors.card }]}>
@@ -410,5 +416,17 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         letterSpacing: 1,
+    },
+    scoreContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 12,
+    },
+    scoreLabel: {
+        fontSize: 10,
+        fontWeight: '600',
     },
 });

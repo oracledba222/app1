@@ -30,7 +30,7 @@ function MainContent() {
       case 'interview-phrases':
         return <VocabularyQuizScreen data={interviewPhrases} title="Job Interview Phrases" onBack={() => setCurrentScreen('menu')} instructionText="Select the matching phrase:" />;
       case 'interview-questions':
-        return <VocabularyQuizScreen data={interviewQuestions} title="Job Interview Questions" onBack={() => setCurrentScreen('menu')} instructionText="Select the matching question:" />;
+        return <VocabularyQuizScreen data={interviewQuestions} title="Job Interview Questions" onBack={() => setCurrentScreen('menu')} instructionText="Select the best advice:" promptLabel="Question:" swapDisplay={true} />;
       case 'menu':
       default:
         return (

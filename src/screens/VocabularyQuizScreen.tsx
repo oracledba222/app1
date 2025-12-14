@@ -12,11 +12,13 @@ interface VocabularyQuizScreenProps {
     data: Word[];
     title: string;
     instructionText?: string;
+    promptLabel?: string;
+    swapDisplay?: boolean;
 }
 
 const { width } = Dimensions.get('window');
 
-export default function VocabularyQuizScreen({ onBack, data, title, instructionText = "Select the matching word:" }: VocabularyQuizScreenProps) {
+export default function VocabularyQuizScreen({ onBack, data, title, instructionText = "Select the matching word:", promptLabel = "Definition:", swapDisplay = false }: VocabularyQuizScreenProps) {
     const [currentWord, setCurrentWord] = useState<Word | null>(null);
     const [options, setOptions] = useState<Word[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -98,6 +100,9 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
         };
     });
 
+    const mainText = swapDisplay ? currentWord?.word : currentWord?.definition;
+    const optionText = (opt: Word) => swapDisplay ? opt.definition : opt.word;
+
     if (!currentWord) return <View style={styles.container}><Text style={{ color: colors.text }}>Loading...</Text></View>;
 
     if (isFinished) {
@@ -134,16 +139,21 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
 
             <View style={styles.header}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Menu</Text>
+                    <Text style={styles.backButtonText}>←</Text>
                 </TouchableOpacity>
-                <Text style={styles.modeTitle}>{title}</Text>
-                <Text style={[styles.score, { color: colors.score }]}>{score}/10</Text>
+                <View style={{ flex: 1, alignItems: 'center', marginHorizontal: 5 }}>
+                    <Header compact lessonTitle={title} />
+                </View>
+                <View style={styles.scoreContainer}>
+                    <Text style={[styles.score, { color: colors.score }]}>{score}</Text>
+                    <Text style={[styles.scoreLabel, { color: colors.score }]}>/10</Text>
+                </View>
             </View>
 
             <Animated.View style={[styles.card, animatedCardStyle, { backgroundColor: colors.card }]}>
-                <Text style={styles.label}>Definition:</Text>
-                <Text style={[styles.definition, { color: colors.text }]}>"{currentWord.definition}"</Text>
-                <TouchableOpacity onPress={() => speak(currentWord.definition)} style={styles.speakButton}>
+                <Text style={styles.label}>{promptLabel}</Text>
+                <Text style={[styles.definition, { color: colors.text }]}>"{mainText}"</Text>
+                <TouchableOpacity onPress={() => mainText && speak(mainText)} style={styles.speakButton}>
                     <Text style={styles.speakIcon}>🔊</Text>
                 </TouchableOpacity>
 
@@ -174,7 +184,7 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
                                 onPress={() => handleOptionPress(index)}
                                 disabled={selectedIndex !== null}
                             >
-                                <Text style={[styles.optionText, { color: textColor }]}>{opt.word}</Text>
+                                <Text style={[styles.optionText, { color: textColor }]}>{optionText(opt)}</Text>
                             </TouchableOpacity>
                         );
                     })}
@@ -226,13 +236,26 @@ const styles = StyleSheet.create({
     modeTitle: {
         color: '#fff',
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 14, // Smaller title in compact mode if needed
         opacity: 0.9,
+    },
+    scoreContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 12,
     },
     score: {
         color: '#fff',
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
+        lineHeight: 22,
+    },
+    scoreLabel: {
+        fontSize: 10,
+        fontWeight: '600',
     },
     card: {
         backgroundColor: '#fff',

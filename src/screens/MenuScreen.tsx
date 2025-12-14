@@ -153,9 +153,11 @@ export default function MenuScreen({ onStartIrregular, onStartNouns, onStartVerb
 
                 </View>
             </ScrollView>
+            <Text style={styles.copyright}>Copyright © 2025 Oleksiy Krotov</Text>
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -235,4 +237,12 @@ const styles = StyleSheet.create({
     spacer: {
         height: 15,
     },
+    copyright: {
+        fontSize: 10,
+        color: '#fff',
+        opacity: 0.6,
+        textAlign: 'center',
+        marginTop: 10,
+    },
 });
+
