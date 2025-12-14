@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { loadStats } from '../utils/storage';
 import { irregularVerbs } from '../data/verbs';
@@ -7,7 +7,9 @@ import { nouns } from '../data/nouns';
 import { regularVerbs } from '../data/regularVerbs';
 import { interviewWords } from '../data/interviewWords';
 import { interviewPhrases } from '../data/interviewPhrases';
+import { interviewQuestions } from '../data/interviewQuestions';
 import Header from '../components/Header';
+import { useTheme } from '../context/ThemeContext';
 
 interface MenuScreenProps {
     onStartIrregular: () => void;
@@ -15,12 +17,14 @@ interface MenuScreenProps {
     onStartVerbs: () => void;
     onStartInterviewWords: () => void;
     onStartInterviewPhrases: () => void;
+    onStartInterviewQuestions: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-export default function MenuScreen({ onStartIrregular, onStartNouns, onStartVerbs, onStartInterviewWords, onStartInterviewPhrases }: MenuScreenProps) {
-    const [counts, setCounts] = useState({ irregular: 0, nouns: 0, verbs: 0, interviewWords: 0, interviewPhrases: 0 });
+export default function MenuScreen({ onStartIrregular, onStartNouns, onStartVerbs, onStartInterviewWords, onStartInterviewPhrases, onStartInterviewQuestions }: MenuScreenProps) {
+    const [counts, setCounts] = useState({ irregular: 0, nouns: 0, verbs: 0, interviewWords: 0, interviewPhrases: 0, interviewQuestions: 0 });
+    const { colors, theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         loadStatsData();
@@ -46,87 +50,109 @@ export default function MenuScreen({ onStartIrregular, onStartNouns, onStartVerb
             verbs: countMastered(regularVerbs, 'word'),
             interviewWords: countMastered(interviewWords, 'word'),
             interviewPhrases: countMastered(interviewPhrases, 'word'),
+            interviewQuestions: countMastered(interviewQuestions, 'word'),
         });
     };
 
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={['#4c669f', '#3b5998', '#192f6a']}
+                colors={colors.background as any}
                 style={styles.background}
             />
-            <View style={styles.card}>
-                <Header />
 
-                <TouchableOpacity style={styles.button} onPress={onStartIrregular} activeOpacity={0.8}>
-                    <LinearGradient
-                        colors={['#ff7e5f', '#feb47b']}
-                        style={styles.buttonGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                    >
-                        <Text style={styles.buttonText}>IRREGULAR VERBS</Text>
-                        <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.irregular} / {irregularVerbs.length}</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+            <TouchableOpacity style={styles.themeToggle} onPress={toggleTheme}>
+                <Text style={styles.themeToggleText}>{theme === 'light' ? '🌙' : '☀️'}</Text>
+            </TouchableOpacity>
 
-                <View style={styles.spacer} />
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <View style={[styles.card, { backgroundColor: colors.card }]}>
+                    <Header />
 
-                <TouchableOpacity style={styles.button} onPress={onStartNouns} activeOpacity={0.8}>
-                    <LinearGradient
-                        colors={['#43cea2', '#185a9d']}
-                        style={styles.buttonGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                    >
-                        <Text style={styles.buttonText}>NOUNS</Text>
-                        <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.nouns} / {nouns.length}</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={onStartIrregular} activeOpacity={0.8}>
+                        <LinearGradient
+                            colors={['#ff7e5f', '#feb47b']}
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <Text style={styles.buttonText}>IRREGULAR VERBS</Text>
+                            <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.irregular} / {irregularVerbs.length}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
 
-                <View style={styles.spacer} />
+                    <View style={styles.spacer} />
 
-                <TouchableOpacity style={styles.button} onPress={onStartVerbs} activeOpacity={0.8}>
-                    <LinearGradient
-                        colors={['#c94b4b', '#4b134f']}
-                        style={styles.buttonGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                    >
-                        <Text style={styles.buttonText}>REGULAR VERBS</Text>
-                        <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.verbs} / {regularVerbs.length}</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={onStartNouns} activeOpacity={0.8}>
+                        <LinearGradient
+                            colors={['#43cea2', '#185a9d']}
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <Text style={styles.buttonText}>NOUNS</Text>
+                            <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.nouns} / {nouns.length}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
 
-                <View style={styles.spacer} />
+                    <View style={styles.spacer} />
 
-                <TouchableOpacity style={styles.button} onPress={onStartInterviewWords} activeOpacity={0.8}>
-                    <LinearGradient
-                        colors={['#11998e', '#38ef7d']}
-                        style={styles.buttonGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                    >
-                        <Text style={styles.buttonText}>JOB INTERVIEW WORDS</Text>
-                        <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.interviewWords} / {interviewWords.length}</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={onStartVerbs} activeOpacity={0.8}>
+                        <LinearGradient
+                            colors={['#c94b4b', '#4b134f']}
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <Text style={styles.buttonText}>REGULAR VERBS</Text>
+                            <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.verbs} / {regularVerbs.length}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
 
-                <View style={styles.spacer} />
+                    <View style={styles.spacer} />
 
-                <TouchableOpacity style={styles.button} onPress={onStartInterviewPhrases} activeOpacity={0.8}>
-                    <LinearGradient
-                        colors={['#8E2DE2', '#4A00E0']}
-                        style={styles.buttonGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                    >
-                        <Text style={styles.buttonText}>JOB INTERVIEW PHRASES</Text>
-                        <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.interviewPhrases} / {interviewPhrases.length}</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={onStartInterviewWords} activeOpacity={0.8}>
+                        <LinearGradient
+                            colors={['#11998e', '#38ef7d']}
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <Text style={styles.buttonText}>JOB INTERVIEW WORDS</Text>
+                            <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.interviewWords} / {interviewWords.length}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
 
-            </View>
+                    <View style={styles.spacer} />
+
+                    <TouchableOpacity style={styles.button} onPress={onStartInterviewPhrases} activeOpacity={0.8}>
+                        <LinearGradient
+                            colors={['#8E2DE2', '#4A00E0']}
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <Text style={styles.buttonText}>JOB INTERVIEW PHRASES</Text>
+                            <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.interviewPhrases} / {interviewPhrases.length}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+
+                    <View style={styles.spacer} />
+
+                    <TouchableOpacity style={styles.button} onPress={onStartInterviewQuestions} activeOpacity={0.8}>
+                        <LinearGradient
+                            colors={['#C04848', '#480048']} // Deep Red/Purple gradient
+                            style={styles.buttonGradient}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                        >
+                            <Text style={styles.buttonText}>JOB INTERVIEW QUESTIONS</Text>
+                            <Text style={styles.buttonSubText}>Top 100 • Mastered: {counts.interviewQuestions} / {interviewQuestions.length}</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+
+                </View>
+            </ScrollView>
         </View>
     );
 }
@@ -134,8 +160,6 @@ export default function MenuScreen({ onStartIrregular, onStartNouns, onStartVerb
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     background: {
         position: 'absolute',
@@ -144,8 +168,14 @@ const styles = StyleSheet.create({
         top: 0,
         bottom: 0,
     },
+    scrollContent: {
+        flexGrow: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 50,
+        paddingBottom: 100, // Extra padding at bottom
+    },
     card: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         borderRadius: 24,
         padding: 25,
         width: width * 0.9,
@@ -158,24 +188,19 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 8,
+        marginVertical: 20, // Add margin to avoid clipping on small screens if not fully scrolling
     },
-    statsContainer: {
-        marginBottom: 20,
-        alignItems: 'center',
+    themeToggle: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 20,
+        backgroundColor: 'rgba(255,255,255,0.2)',
         padding: 10,
-        backgroundColor: '#f0f4f8',
-        borderRadius: 12,
-        width: '100%',
+        borderRadius: 20,
     },
-    statsLabel: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 2,
-    },
-    statsValue: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#3b5998',
+    themeToggleText: {
+        fontSize: 24,
     },
     button: {
         width: '100%',
@@ -199,6 +224,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         letterSpacing: 1,
         textTransform: 'uppercase',
+        textAlign: 'center', // Ensure text centers on multiple lines if font scales
     },
     buttonSubText: {
         color: 'rgba(255,255,255,0.8)',

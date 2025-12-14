@@ -6,6 +6,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence, w
 import { generateQuestion, Question } from '../utils/quizLogic';
 import { updateVerbStat } from '../utils/storage';
 import Header from '../components/Header';
+import { useTheme } from '../context/ThemeContext';
 
 interface QuizScreenProps {
     onBack: () => void;
@@ -19,7 +20,8 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
-    const [showExample, setShowExample] = useState(false);
+    const { colors } = useTheme();
+
 
     // Animations
     const cardScale = useSharedValue(1);
@@ -33,7 +35,7 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
         // Reset states
         setSelectedOptionIndex(null);
         setIsCorrect(null);
-        setShowExample(false);
+
         feedbackOpacity.value = 0;
         cardScale.value = withSequence(withTiming(0.95, { duration: 100 }), withTiming(1, { duration: 100 }));
 
@@ -59,21 +61,19 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
         feedbackOpacity.value = withSpring(1);
 
         if (correct) {
-            Speech.speak("Correct!", { rate: 1.2 });
             setScore(s => {
                 const newScore = s + 1;
                 if (newScore >= 10) {
                     setTimeout(() => setIsFinished(true), 1500);
                 } else {
-                    // Show example for a bit longer if correct
-                    setShowExample(true);
-                    speak(question.verb.example);
+                    // Speak example sentence on correct answer
+                    // speak(question.verb.example); // Disabled auto-tts
                     setTimeout(loadNewQuestion, 3000);
                 }
                 return newScore;
             });
         } else {
-            Speech.speak("Try again next time", { rate: 1.2 });
+            // No TTS on error, just wait
             setTimeout(loadNewQuestion, 2000);
         }
     };
@@ -91,19 +91,19 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
         };
     });
 
-    if (!question) return <View style={styles.container}><Text>Loading...</Text></View>;
+    if (!question) return <View style={styles.container}><Text style={{ color: colors.text }}>Loading...</Text></View>;
 
     if (isFinished) {
         return (
             <View style={styles.container}>
                 <LinearGradient
-                    colors={['#4c669f', '#3b5998', '#192f6a']}
+                    colors={colors.background as any}
                     style={styles.background}
                 />
-                <View style={styles.card}>
+                <View style={[styles.card, { backgroundColor: colors.card }]}>
                     <Header />
-                    <Text style={styles.finishTitle}>Congratulations! 🎉</Text>
-                    <Text style={styles.finishText}>You mastered 10 verbs!</Text>
+                    <Text style={[styles.finishTitle, { color: colors.text }]}>Congratulations! 🎉</Text>
+                    <Text style={[styles.finishText, { color: colors.accent }]}>You mastered 10 verbs!</Text>
 
                     <TouchableOpacity style={styles.button} onPress={onBack}>
                         <LinearGradient
@@ -121,7 +121,7 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={['#4c669f', '#3b5998', '#192f6a']}
+                colors={colors.background as any}
                 style={styles.background}
             />
 
@@ -129,12 +129,12 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
                     <Text style={styles.backButtonText}>← Menu</Text>
                 </TouchableOpacity>
-                <Text style={styles.score}>Score: {score}</Text>
+                <Text style={[styles.score, { color: colors.score }]}>Score: {score}</Text>
             </View>
 
-            <Animated.View style={[styles.card, animatedCardStyle]}>
+            <Animated.View style={[styles.card, animatedCardStyle, { backgroundColor: colors.card }]}>
                 <View style={styles.verbRow}>
-                    <Text style={styles.verb}>{question.verb.infinitive}</Text>
+                    <Text style={[styles.verb, { color: colors.text }]}>{question.verb.infinitive}</Text>
                     <TouchableOpacity onPress={() => speak(question.verb.infinitive)} style={styles.speakButton}>
                         <Text style={styles.speakIcon}>🔊</Text>
                     </TouchableOpacity>
@@ -142,29 +142,33 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
 
                 <Text style={styles.translation}></Text>
 
-                {showExample && (
-                    <View style={styles.exampleContainer}>
+                <View style={styles.exampleContainer}>
+                    <Text style={styles.exampleLabel}>Example:</Text>
+                    <View style={styles.exampleContent}>
                         <Text style={styles.exampleText}>"{question.verb.example}"</Text>
+                        <TouchableOpacity onPress={() => speak(question.verb.example)} style={styles.exampleSpeakButton}>
+                            <Text style={styles.speakIconSmall}>🔊</Text>
+                        </TouchableOpacity>
                     </View>
-                )}
+                </View>
 
-                <Text style={styles.instruction}>Choose Past Forms:</Text>
+                <Text style={[styles.instruction]}>Choose Past Forms:</Text>
 
                 <View style={styles.optionsContainer}>
                     {question.options.map((option, index) => {
-                        let backgroundColor = '#f8f9fa';
-                        let borderColor = '#e9ecef';
-                        let textColor = '#333';
+                        let backgroundColor = colors.optionBackground;
+                        let borderColor = colors.optionBorder;
+                        let textColor = colors.optionText;
 
                         if (selectedOptionIndex !== null) {
                             if (index === question.correctOptionIndex) {
-                                backgroundColor = '#d4edda'; // Light green
-                                borderColor = '#c3e6cb';
-                                textColor = '#155724';
+                                backgroundColor = colors.success + '40'; // Transparent success
+                                borderColor = colors.success;
+                                textColor = colors.success;
                             } else if (index === selectedOptionIndex) {
-                                backgroundColor = '#f8d7da'; // Light red
-                                borderColor = '#f5c6cb';
-                                textColor = '#721c24';
+                                backgroundColor = colors.error + '40'; // Transparent error
+                                borderColor = colors.error;
+                                textColor = colors.error;
                             }
                         }
 
@@ -192,8 +196,8 @@ export default function QuizScreen({ onBack }: QuizScreenProps) {
                     })}
                 </View>
 
-                <Animated.View style={[styles.feedbackContainer, animatedFeedbackStyle]}>
-                    <Text style={[styles.feedbackText, { color: isCorrect ? '#28a745' : '#dc3545' }]}>
+                <Animated.View style={[styles.feedbackContainer, animatedFeedbackStyle, { backgroundColor: colors.card }]}>
+                    <Text style={[styles.feedbackText, { color: isCorrect ? colors.success : colors.error }]}>
                         {isCorrect ? 'Awesome!' : 'Oops!'}
                     </Text>
                 </Animated.View>
@@ -278,16 +282,38 @@ const styles = StyleSheet.create({
     },
     exampleContainer: {
         backgroundColor: '#e3f2fd',
-        padding: 10,
+        padding: 12,
         borderRadius: 10,
         marginBottom: 20,
         width: '100%',
     },
+    exampleLabel: {
+        fontSize: 12,
+        color: '#1565c0',
+        fontWeight: 'bold',
+        marginBottom: 4,
+        textTransform: 'uppercase',
+    },
+    exampleContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     exampleText: {
         color: '#0d47a1',
-        textAlign: 'center',
         fontStyle: 'italic',
         fontWeight: '500',
+        flex: 1,
+        fontSize: 16,
+    },
+    exampleSpeakButton: {
+        padding: 8,
+        marginLeft: 8,
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        borderRadius: 20,
+    },
+    speakIconSmall: {
+        fontSize: 18,
     },
     instruction: {
         fontSize: 14,

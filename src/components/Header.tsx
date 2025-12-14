@@ -1,15 +1,18 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Header() {
+    const { colors } = useTheme();
+
     return (
         <View style={styles.container}>
-            <View style={styles.logoContainer}>
+            <View style={[styles.logoContainer, { backgroundColor: colors.text }]}>
                 <Text style={styles.icon}>💡</Text>
             </View>
             <View>
-                <Text style={styles.title}>Smart English</Text>
-                <Text style={styles.subtitle}>LESSONS</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Smart English</Text>
+                <Text style={[styles.subtitle, { color: colors.accent }]}>LESSONS</Text>
             </View>
         </View>
     );
@@ -26,7 +29,6 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 15,
@@ -42,15 +44,13 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: '800',
-        color: '#fff',
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowColor: 'rgba(0, 0, 0, 0.1)',
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 3,
     },
     subtitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#e3f2fd',
         letterSpacing: 4,
     },
 });

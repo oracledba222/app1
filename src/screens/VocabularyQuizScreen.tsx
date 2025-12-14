@@ -5,6 +5,7 @@ import * as Speech from 'expo-speech';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence, withTiming } from 'react-native-reanimated';
 import Header from '../components/Header';
 import { Word } from '../data/nouns';
+import { useTheme } from '../context/ThemeContext';
 
 interface VocabularyQuizScreenProps {
     onBack: () => void;
@@ -22,6 +23,7 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
+    const { colors } = useTheme();
 
     // Animations
     const cardScale = useSharedValue(1);
@@ -68,7 +70,6 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
         feedbackOpacity.value = withSpring(1);
 
         if (correct) {
-            Speech.speak("Correct!", { rate: 1.2 });
             setScore(s => {
                 const newScore = s + 1;
                 if (newScore >= 10) {
@@ -79,7 +80,7 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
                 return newScore;
             });
         } else {
-            Speech.speak("Try again", { rate: 1.2 });
+            // No TTS
             setTimeout(loadNewQuestion, 2000);
         }
     };
@@ -97,19 +98,19 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
         };
     });
 
-    if (!currentWord) return <View style={styles.container}><Text>Loading...</Text></View>;
+    if (!currentWord) return <View style={styles.container}><Text style={{ color: colors.text }}>Loading...</Text></View>;
 
     if (isFinished) {
         return (
             <View style={styles.container}>
                 <LinearGradient
-                    colors={['#4c669f', '#3b5998', '#192f6a']}
+                    colors={colors.background as any}
                     style={styles.background}
                 />
-                <View style={styles.card}>
+                <View style={[styles.card, { backgroundColor: colors.card }]}>
                     <Header />
-                    <Text style={styles.finishTitle}>Congratulations! 🎉</Text>
-                    <Text style={styles.finishText}>You mastered 10 words!</Text>
+                    <Text style={[styles.finishTitle, { color: colors.text }]}>Congratulations! 🎉</Text>
+                    <Text style={[styles.finishText, { color: colors.accent }]}>You mastered 10 words!</Text>
 
                     <TouchableOpacity style={styles.button} onPress={onBack}>
                         <LinearGradient
@@ -127,7 +128,7 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={['#4c669f', '#3b5998', '#192f6a']}
+                colors={colors.background as any}
                 style={styles.background}
             />
 
@@ -136,12 +137,12 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
                     <Text style={styles.backButtonText}>← Menu</Text>
                 </TouchableOpacity>
                 <Text style={styles.modeTitle}>{title}</Text>
-                <Text style={styles.score}>{score}/10</Text>
+                <Text style={[styles.score, { color: colors.score }]}>{score}/10</Text>
             </View>
 
-            <Animated.View style={[styles.card, animatedCardStyle]}>
+            <Animated.View style={[styles.card, animatedCardStyle, { backgroundColor: colors.card }]}>
                 <Text style={styles.label}>Definition:</Text>
-                <Text style={styles.definition}>"{currentWord.definition}"</Text>
+                <Text style={[styles.definition, { color: colors.text }]}>"{currentWord.definition}"</Text>
                 <TouchableOpacity onPress={() => speak(currentWord.definition)} style={styles.speakButton}>
                     <Text style={styles.speakIcon}>🔊</Text>
                 </TouchableOpacity>
@@ -150,19 +151,19 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
 
                 <View style={styles.optionsContainer}>
                     {options.map((opt, index) => {
-                        let backgroundColor = '#f8f9fa';
-                        let borderColor = '#e9ecef';
-                        let textColor = '#333';
+                        let backgroundColor = colors.optionBackground;
+                        let borderColor = colors.optionBorder;
+                        let textColor = colors.optionText;
 
                         if (selectedIndex !== null) {
                             if (opt.word === currentWord.word) {
-                                backgroundColor = '#d4edda';
-                                borderColor = '#c3e6cb';
-                                textColor = '#155724';
+                                backgroundColor = colors.success + '40';
+                                borderColor = colors.success;
+                                textColor = colors.success;
                             } else if (index === selectedIndex) {
-                                backgroundColor = '#f8d7da';
-                                borderColor = '#f5c6cb';
-                                textColor = '#721c24';
+                                backgroundColor = colors.error + '40';
+                                borderColor = colors.error;
+                                textColor = colors.error;
                             }
                         }
 
@@ -179,8 +180,8 @@ export default function VocabularyQuizScreen({ onBack, data, title, instructionT
                     })}
                 </View>
 
-                <Animated.View style={[styles.feedbackContainer, animatedFeedbackStyle]}>
-                    <Text style={[styles.feedbackText, { color: isCorrect ? '#28a745' : '#dc3545' }]}>
+                <Animated.View style={[styles.feedbackContainer, animatedFeedbackStyle, { backgroundColor: colors.card }]}>
+                    <Text style={[styles.feedbackText, { color: isCorrect ? colors.success : colors.error }]}>
                         {isCorrect ? 'Correct!' : 'Incorrect'}
                     </Text>
                 </Animated.View>

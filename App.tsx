@@ -8,10 +8,13 @@ import { nouns } from './src/data/nouns';
 import { regularVerbs } from './src/data/regularVerbs';
 import { interviewWords } from './src/data/interviewWords';
 import { interviewPhrases } from './src/data/interviewPhrases';
+import { interviewQuestions } from './src/data/interviewQuestions';
 
-type Screen = 'menu' | 'irregular' | 'nouns' | 'verbs' | 'interview-words' | 'interview-phrases';
+type Screen = 'menu' | 'irregular' | 'nouns' | 'verbs' | 'interview-words' | 'interview-phrases' | 'interview-questions';
 
-export default function App() {
+import { ThemeProvider } from './src/context/ThemeContext';
+
+function MainContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
 
   const renderScreen = () => {
@@ -26,6 +29,8 @@ export default function App() {
         return <VocabularyQuizScreen data={interviewWords} title="Job Interview Words" onBack={() => setCurrentScreen('menu')} />;
       case 'interview-phrases':
         return <VocabularyQuizScreen data={interviewPhrases} title="Job Interview Phrases" onBack={() => setCurrentScreen('menu')} instructionText="Select the matching phrase:" />;
+      case 'interview-questions':
+        return <VocabularyQuizScreen data={interviewQuestions} title="Job Interview Questions" onBack={() => setCurrentScreen('menu')} instructionText="Select the matching question:" />;
       case 'menu':
       default:
         return (
@@ -35,6 +40,7 @@ export default function App() {
             onStartVerbs={() => setCurrentScreen('verbs')}
             onStartInterviewWords={() => setCurrentScreen('interview-words')}
             onStartInterviewPhrases={() => setCurrentScreen('interview-phrases')}
+            onStartInterviewQuestions={() => setCurrentScreen('interview-questions')}
           />
         );
     }
@@ -45,6 +51,14 @@ export default function App() {
       <StatusBar style="light" />
       {renderScreen()}
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainContent />
+    </ThemeProvider>
   );
 }
 
